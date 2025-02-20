@@ -1,38 +1,94 @@
 /* css/style.css */
 
+/* Base Styles */
 body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  background-color: #f5f5f5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #74ABE2, #5563DE);
+  margin: 0;
+  padding: 20px;
+  color: #333;
 }
 
 section {
   background-color: #fff;
   padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  max-width: 600px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
+/* Headings */
 h2, h3 {
   margin-top: 0;
+  text-align: center;
 }
 
+/* Forms & Inputs */
 form input, form button, select {
   display: block;
-  margin-bottom: 10px;
-  padding: 8px;
-  width: 100%;
-  max-width: 300px;
+  margin: 10px auto;
+  padding: 10px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   box-sizing: border-box;
 }
 
-button {
-  cursor: pointer;
+form button {
+  background-color: #5563DE;
+  color: #fff;
+  border: none;
+  transition: background-color 0.3s ease;
 }
 
+form button:hover {
+  background-color: #3a45a1;
+}
+
+/* Links */
+a {
+  color: #5563DE;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Question Blocks */
 #questions-container .question {
   border: 1px solid #ddd;
-  padding: 10px;
-  margin-bottom: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  position: relative;
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Multiple Choice Options */
+.multiple-choice-options {
+  margin-top: 10px;
+}
+
+.multiple-choice-options .option {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.multiple-choice-options input[type="text"] {
+  flex: 1;
+  margin-right: 10px;
+}
+
+/* Fade-in animation */
+.fade-in {
+  animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

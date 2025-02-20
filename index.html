@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quiz Maker</title>
+  <title>Advanced Quiz Maker</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <!-- Login Section -->
-  <section id="login-section">
+  <section id="login-section" class="fade-in">
     <h2>Login</h2>
     <form id="login-form">
       <input type="text" id="login-username" placeholder="Username" required />
@@ -19,7 +19,7 @@
   </section>
 
   <!-- Register Section -->
-  <section id="register-section" style="display: none;">
+  <section id="register-section" class="fade-in" style="display: none;">
     <h2>Register</h2>
     <form id="register-form">
       <input type="text" id="register-username" placeholder="Username" required />
@@ -30,7 +30,7 @@
   </section>
 
   <!-- Dashboard Section -->
-  <section id="dashboard-section" style="display: none;">
+  <section id="dashboard-section" class="fade-in" style="display: none;">
     <h2>Welcome, <span id="user-display"></span>!</h2>
     <button id="logout-btn">Logout</button>
 
@@ -40,7 +40,7 @@
       <form id="create-quiz-form">
         <input type="text" id="quiz-title" placeholder="Quiz Title" required />
         <div id="questions-container">
-          <!-- Questions will be added here dynamically -->
+          <!-- Dynamic question blocks will be added here -->
         </div>
         <button type="button" id="add-question-btn">Add Question</button>
         <button type="submit">Save Quiz</button>
@@ -61,7 +61,7 @@
       <h3 id="quiz-title-display"></h3>
       <form id="quiz-form">
         <div id="quiz-questions">
-          <!-- Quiz questions will appear here -->
+          <!-- Quiz questions will be rendered here -->
         </div>
         <button type="submit">Submit Quiz</button>
       </form>

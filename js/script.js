@@ -1,23 +1,18 @@
 /* js/script.js */
 
 // === Utility Functions for localStorage ===
-
-// Get users from localStorage (or return an empty object if none exist)
 function getUsers() {
   return JSON.parse(localStorage.getItem('users')) || {};
 }
 
-// Save users object to localStorage
 function saveUsers(users) {
   localStorage.setItem('users', JSON.stringify(users));
 }
 
-// Get quizzes from localStorage (or return an empty array if none exist)
 function getQuizzes() {
   return JSON.parse(localStorage.getItem('quizzes')) || [];
 }
 
-// Save quizzes array to localStorage
 function saveQuizzes(quizzes) {
   localStorage.setItem('quizzes', JSON.stringify(quizzes));
 }
@@ -45,10 +40,9 @@ const quizQuestionsDiv = document.getElementById('quiz-questions');
 const quizForm = document.getElementById('quiz-form');
 const quizResultDiv = document.getElementById('quiz-result');
 
-// Variable to store the current logged-in user
 let currentUser = null;
 
-// === Toggle Between Login and Register Sections ===
+// === Toggle Between Login and Register ===
 showRegisterLink.addEventListener('click', () => {
   loginSection.style.display = 'none';
   registerSection.style.display = 'block';
@@ -85,11 +79,9 @@ registerForm.addEventListener('submit', (e) => {
   if (users[username]) {
     alert('Username already exists.');
   } else {
-    // Save the new user
     users[username] = { password: password };
     saveUsers(users);
     alert('Registration successful! You can now log in.');
-    // Switch to login view
     registerSection.style.display = 'none';
     loginSection.style.display = 'block';
   }
@@ -100,53 +92,139 @@ logoutBtn.addEventListener('click', () => {
   currentUser = null;
   dashboardSection.style.display = 'none';
   loginSection.style.display = 'block';
-  // For simplicity, reload the page to clear any dynamic content.
   location.reload();
 });
 
-// === Show Dashboard After Successful Login ===
+// === Show Dashboard ===
 function showDashboard() {
   userDisplay.textContent = currentUser;
   loginSection.style.display = 'none';
   registerSection.style.display = 'none';
   dashboardSection.style.display = 'block';
-  loadQuizOptions(); // Populate the quiz dropdown
+  loadQuizOptions();
 }
 
 // === Quiz Creation Functionality ===
 
-// When user clicks "Add Question", dynamically add a new question block
-addQuestionBtn.addEventListener('click', () => {
+// Helper: Create a new question block
+function createQuestionBlock() {
   const questionDiv = document.createElement('div');
   questionDiv.classList.add('question');
 
-  // Input for the question text
+  // Dropdown for selecting question type
+  const typeSelect = document.createElement('select');
+  typeSelect.innerHTML = `
+    <option value="text">Text Question</option>
+    <option value="mc">Multiple Choice</option>
+  `;
+  questionDiv.appendChild(typeSelect);
+
+  // Common input: Question text
   const questionInput = document.createElement('input');
   questionInput.type = 'text';
-  questionInput.placeholder = 'Question text';
+  questionInput.placeholder = 'Enter question text';
   questionInput.required = true;
   questionDiv.appendChild(questionInput);
 
-  // Input for the correct answer
-  const answerInput = document.createElement('input');
-  answerInput.type = 'text';
-  answerInput.placeholder = 'Correct answer';
-  answerInput.required = true;
-  questionDiv.appendChild(answerInput);
+  // Container for answer inputs; will change based on type
+  const answerContainer = document.createElement('div');
+  answerContainer.classList.add('answer-container');
+  questionDiv.appendChild(answerContainer);
 
-  // Button to remove this question if needed
+  // Initially add text answer input (default for "text" type)
+  function loadTextAnswer() {
+    answerContainer.innerHTML = '';
+    const answerInput = document.createElement('input');
+    answerInput.type = 'text';
+    answerInput.placeholder = 'Enter correct answer';
+    answerInput.required = true;
+    answerContainer.appendChild(answerInput);
+  }
+
+  // For multiple choice: allow multiple options with radio buttons to mark the correct answer
+  function loadMultipleChoice() {
+    answerContainer.innerHTML = '';
+    const optionsDiv = document.createElement('div');
+    optionsDiv.classList.add('multiple-choice-options');
+    answerContainer.appendChild(optionsDiv);
+
+    // Button to add an option
+    const addOptionBtn = document.createElement('button');
+    addOptionBtn.type = 'button';
+    addOptionBtn.textContent = 'Add Option';
+    addOptionBtn.style.marginTop = '10px';
+    answerContainer.appendChild(addOptionBtn);
+
+    // Function to add an option input
+    function addOption() {
+      const optionDiv = document.createElement('div');
+      optionDiv.classList.add('option');
+
+      // Radio button to mark correct option (name must be unique per question)
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'correct-' + Date.now(); // unique name for each multiple choice set
+      radio.required = true;
+      optionDiv.appendChild(radio);
+
+      // Option text input
+      const optionInput = document.createElement('input');
+      optionInput.type = 'text';
+      optionInput.placeholder = 'Option text';
+      optionInput.required = true;
+      optionDiv.appendChild(optionInput);
+
+      // Remove option button
+      const removeOptionBtn = document.createElement('button');
+      removeOptionBtn.type = 'button';
+      removeOptionBtn.textContent = 'Remove';
+      removeOptionBtn.addEventListener('click', () => {
+        optionsDiv.removeChild(optionDiv);
+      });
+      optionDiv.appendChild(removeOptionBtn);
+
+      optionsDiv.appendChild(optionDiv);
+    }
+
+    // Add one default option
+    addOption();
+
+    addOptionBtn.addEventListener('click', addOption);
+  }
+
+  // Load default answer input (text question)
+  loadTextAnswer();
+
+  // Change answer UI based on question type selection
+  typeSelect.addEventListener('change', () => {
+    if (typeSelect.value === 'text') {
+      loadTextAnswer();
+    } else if (typeSelect.value === 'mc') {
+      loadMultipleChoice();
+    }
+  });
+
+  // Remove question button
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
   removeBtn.textContent = 'Remove Question';
+  removeBtn.style.position = 'absolute';
+  removeBtn.style.top = '10px';
+  removeBtn.style.right = '10px';
   removeBtn.addEventListener('click', () => {
     questionsContainer.removeChild(questionDiv);
   });
   questionDiv.appendChild(removeBtn);
 
-  questionsContainer.appendChild(questionDiv);
+  return questionDiv;
+}
+
+addQuestionBtn.addEventListener('click', () => {
+  const newQuestionBlock = createQuestionBlock();
+  questionsContainer.appendChild(newQuestionBlock);
 });
 
-// When the quiz creation form is submitted, gather the quiz details and save it
+// Save the quiz
 createQuizForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const title = document.getElementById('quiz-title').value.trim();
@@ -154,27 +232,55 @@ createQuizForm.addEventListener('submit', (e) => {
     alert('Please enter a quiz title.');
     return;
   }
-  
-  const questionsElements = questionsContainer.querySelectorAll('.question');
+
+  const questionBlocks = questionsContainer.querySelectorAll('.question');
   const questions = [];
-  questionsElements.forEach(qDiv => {
-    const inputs = qDiv.querySelectorAll('input');
-    const questionText = inputs[0].value.trim();
-    const correctAnswer = inputs[1].value.trim();
-    if (questionText && correctAnswer) {
+
+  questionBlocks.forEach(block => {
+    const typeSelect = block.querySelector('select').value;
+    const questionText = block.querySelector('input[type="text"]').value.trim();
+    if (!questionText) return;
+
+    if (typeSelect === 'text') {
+      // Text question: get the answer input from the answer container
+      const answerInput = block.querySelector('.answer-container input[type="text"]');
+      if (!answerInput || !answerInput.value.trim()) return;
       questions.push({
+        type: 'text',
         question: questionText,
+        answer: answerInput.value.trim()
+      });
+    } else if (typeSelect === 'mc') {
+      // Multiple Choice: collect all options and mark which one is correct
+      const optionsDiv = block.querySelector('.multiple-choice-options');
+      const optionDivs = optionsDiv.querySelectorAll('.option');
+      const options = [];
+      let correctAnswer = null;
+      optionDivs.forEach(optDiv => {
+        const radio = optDiv.querySelector('input[type="radio"]');
+        const optionInput = optDiv.querySelector('input[type="text"]');
+        if (optionInput && optionInput.value.trim()) {
+          options.push(optionInput.value.trim());
+          if (radio.checked) {
+            correctAnswer = optionInput.value.trim();
+          }
+        }
+      });
+      if (options.length < 2 || !correctAnswer) return;
+      questions.push({
+        type: 'mc',
+        question: questionText,
+        options: options,
         answer: correctAnswer
       });
     }
   });
-  
+
   if (questions.length === 0) {
-    alert('Please add at least one question.');
+    alert('Please add at least one valid question.');
     return;
   }
-  
-  // Retrieve existing quizzes and add the new one
+
   let quizzes = getQuizzes();
   quizzes.push({
     title: title,
@@ -183,18 +289,14 @@ createQuizForm.addEventListener('submit', (e) => {
   });
   saveQuizzes(quizzes);
   alert('Quiz saved successfully!');
-
-  // Reset the form for a new quiz
   createQuizForm.reset();
   questionsContainer.innerHTML = '';
-
-  // Update the quiz dropdown options
   loadQuizOptions();
 });
 
-// === Load Quiz Options for Taking a Quiz ===
+// === Load Quiz Options ===
 function loadQuizOptions() {
-  quizSelect.innerHTML = ''; // Clear any existing options
+  quizSelect.innerHTML = '';
   const quizzes = getQuizzes();
   quizzes.forEach((quiz, index) => {
     const option = document.createElement('option');
@@ -205,8 +307,6 @@ function loadQuizOptions() {
 }
 
 // === Quiz Taking Functionality ===
-
-// When the "Start Quiz" button is clicked, load the selected quiz into the quiz area
 startQuizBtn.addEventListener('click', () => {
   const selectedIndex = quizSelect.value;
   const quizzes = getQuizzes();
@@ -217,49 +317,82 @@ startQuizBtn.addEventListener('click', () => {
   }
 });
 
-// Function to display the quiz questions for the user to answer
 function startQuiz(quiz) {
   quizArea.style.display = 'block';
   quizTitleDisplay.textContent = quiz.title;
-  quizQuestionsDiv.innerHTML = ''; // Clear any previous questions
+  quizQuestionsDiv.innerHTML = '';
 
-  // For each question, create a label and an input field
   quiz.questions.forEach((q, index) => {
     const questionDiv = document.createElement('div');
     questionDiv.classList.add('quiz-question');
-
     const questionLabel = document.createElement('label');
     questionLabel.textContent = (index + 1) + '. ' + q.question;
     questionDiv.appendChild(questionLabel);
 
-    const answerInput = document.createElement('input');
-    answerInput.type = 'text';
-    answerInput.placeholder = 'Your answer';
-    answerInput.required = true;
-    // Store the correct answer in a data attribute (we’ll compare later)
-    answerInput.setAttribute('data-correct', q.answer);
-    questionDiv.appendChild(answerInput);
+    if (q.type === 'text') {
+      // For text questions, simple text input
+      const answerInput = document.createElement('input');
+      answerInput.type = 'text';
+      answerInput.placeholder = 'Your answer';
+      answerInput.required = true;
+      answerInput.setAttribute('data-correct', q.answer);
+      questionDiv.appendChild(answerInput);
+    } else if (q.type === 'mc') {
+      // For multiple choice, render radio buttons for each option
+      q.options.forEach(optionText => {
+        const optionDiv = document.createElement('div');
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'question-' + index;
+        radio.value = optionText;
+        radio.required = true;
+        optionDiv.appendChild(radio);
 
+        const label = document.createElement('label');
+        label.textContent = optionText;
+        optionDiv.appendChild(label);
+
+        questionDiv.appendChild(optionDiv);
+      });
+      // Store correct answer as data attribute on the container
+      questionDiv.setAttribute('data-correct', q.answer);
+    }
     quizQuestionsDiv.appendChild(questionDiv);
   });
 
-  quizResultDiv.innerHTML = ''; // Clear any previous result
+  quizResultDiv.innerHTML = '';
 }
 
-// When the quiz form is submitted, check the answers and display the score
 quizForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  const answerInputs = quizQuestionsDiv.querySelectorAll('input');
   let score = 0;
-  answerInputs.forEach(input => {
-    const userAnswer = input.value.trim().toLowerCase();
-    const correctAnswer = input.getAttribute('data-correct').trim().toLowerCase();
-    if (userAnswer === correctAnswer) {
-      score++;
-      input.style.borderColor = 'green'; // Visual feedback for correct answer
-    } else {
-      input.style.borderColor = 'red';   // Visual feedback for incorrect answer
+  const totalQuestions = quizQuestionsDiv.querySelectorAll('.quiz-question').length;
+  const questions = quizQuestionsDiv.querySelectorAll('.quiz-question');
+
+  questions.forEach((qDiv, index) => {
+    if (qDiv.querySelector('input[type="text"]')) {
+      // Text question
+      const input = qDiv.querySelector('input[type="text"]');
+      const userAnswer = input.value.trim().toLowerCase();
+      const correctAnswer = input.getAttribute('data-correct').trim().toLowerCase();
+      if (userAnswer === correctAnswer) {
+        score++;
+        input.style.borderColor = 'green';
+      } else {
+        input.style.borderColor = 'red';
+      }
+    } else if (qDiv.querySelectorAll('input[type="radio"]').length > 0) {
+      // Multiple choice question
+      const selected = qDiv.querySelector('input[type="radio"]:checked');
+      const correctAnswer = qDiv.getAttribute('data-correct').trim().toLowerCase();
+      if (selected && selected.value.trim().toLowerCase() === correctAnswer) {
+        score++;
+        selected.parentElement.style.backgroundColor = '#c8e6c9';
+      } else if (selected) {
+        selected.parentElement.style.backgroundColor = '#ffcdd2';
+      }
     }
   });
-  quizResultDiv.textContent = `You scored ${score} out of ${answerInputs.length}.`;
+
+  quizResultDiv.textContent = `You scored ${score} out of ${totalQuestions}.`;
 });
