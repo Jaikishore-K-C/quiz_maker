@@ -1,0 +1,38 @@
+/* css/style.css */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f5f5f5;
+}
+
+section {
+  background-color: #fff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3 {
+  margin-top: 0;
+}
+
+form input, form button, select {
+  display: block;
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
+}
+
+button {
+  cursor: pointer;
+}
+
+#questions-container .question {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+}
